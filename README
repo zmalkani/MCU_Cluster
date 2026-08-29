@@ -2,14 +2,14 @@
 
 ## 1) System Concept
 
-A serial-driven microcontroller cluster (6–8 MCUs) where:
+A serial-driven microcontroller cluster (7 MCUs) where:
 
-- user types commands on Serial Monitor
+- user types commands on Serial Monitor with master node
 - master node schedules distributed tasks
 - worker nodes execute tasks on sensor/model data
 - master aggregates and prints results live
 
-## 2) Node Roles (8-node version)
+## 2) Node Roles (7-node version)
 
 - Node 0: Master + CLI
     - USB Serial interface to user
@@ -17,8 +17,6 @@ A serial-driven microcontroller cluster (6–8 MCUs) where:
 - Node 1–6: Workers
     - execute assigned tasks
     - run sensor processing / tiny inference
-- Node 7: Optional Logger/Gateway
-    - passively logs bus traffic or handles extra I/O(For 6 nodes: 1 master + 4 workers + 1 logger/worker)
 
 ## 3) Network / Bus
 
