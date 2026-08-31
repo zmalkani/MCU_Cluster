@@ -16,17 +16,12 @@ String input = "";
 
 void setup() {
   Serial.begin(115200);
-  Serial.println(ascii);
-  Serial.println("Node: " + String(nodeID));
-  Serial.println("ESP32-S3");
-  Serial.println("-----------------------------");
-  Serial.println("Core: " + String(ESP.getCoreVersion()));
-  Serial.println("Chip: " + String(ESP.getChipModel()));
-  Serial.println("Cores: " + String(ESP.getChipCores()));
-  Serial.println("Revision: " + String(ESP.getChipRevision()));
-  Serial.println("CPU Freq: " + String(ESP.getCpuFreqMHz()) + " MHz");
-  Serial.println("Flash Size: " + String(ESP.getFlashChipSize() / (1024 * 1024)) + " MB");
-  Serial.println("Running: ");  
+
+  pinMode(16, OUTPUT);
+  pinMode(17, OUTPUT);
+  pinMode(18, OUTPUT);
+
+  serialSetup();
   
 }
 
@@ -44,4 +39,19 @@ void loop() {
 // put function definitions here:
 int myFunction(int x, int y) {
   return x + y;
+}
+
+void serialSetup(){
+  //serial setup output
+  Serial.println(ascii);
+  Serial.println("Node: " + String(nodeID));
+  Serial.println("ESP32-S3");
+  Serial.println("-----------------------------");
+  Serial.println("Core: " + String(ESP.getCoreVersion()));
+  Serial.println("Chip: " + String(ESP.getChipModel()));
+  Serial.println("Cores: " + String(ESP.getChipCores()));
+  Serial.println("Revision: " + String(ESP.getChipRevision()));
+  Serial.println("CPU Freq: " + String(ESP.getCpuFreqMHz()) + " MHz");
+  Serial.println("Flash Size: " + String(ESP.getFlashChipSize() / (1024 * 1024)) + " MB");
+  Serial.println("Running: ");  
 }
