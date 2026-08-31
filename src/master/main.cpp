@@ -10,9 +10,9 @@ String ascii = "     __  ___________  __                    \n"
                 "  / ____/ /   / / / / ___/_  __/ ____/ __ \\ \n"
                 " / /   / /   / / / /\\__ \\ / / / __/ / /_/ / \n"
                 "/ /___/ /___/ /_/ /___/ // / / /___/ _, _/  \n"
-                "\\____/_____/\____//____//_/ /_____/_/ |_|  ";
+                "\\____/_____/\\____//____//_/ /_____/_/ |_|  ";
                                                           
-
+String input = "";
 
 void setup() {
   Serial.begin(115200);
@@ -31,9 +31,12 @@ void setup() {
 }
 
 void loop() {
-  String input = (String)Serial.read();
-  if (input.equals("ping")){
-    Serial.println("Ping");
+  if(Serial.available()){
+    input = Serial.readStringUntil('\n');
+    input.trim();
+    if(input.equals("test")){
+      test();
+    }
   }
 
 }
