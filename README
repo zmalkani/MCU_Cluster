@@ -1,0 +1,141 @@
+# Architecture
+
+## 1) System Concept
+
+A serial-driven microcontroller cluster (7 MCUs) where:
+
+- user types commands on Serial Monitor with master node
+- master node schedules distributed tasks
+- worker nodes execute tasks on sensor/model data
+- master aggregates and prints results live
+
+## 2) Node Roles (7-node version)
+
+- Node 0: Master + CLI
+    - USB Serial interface to user
+    - command parser + scheduler + aggregator
+- Node 1–6: Workers
+    - execute assigned tasks
+    - run sensor processing / tiny inference
+
+## 3) Network / Bus
+
+- CAN bus for inter-node comms (recommended)
+    - robust, multi-node friendly, easy fault demo
+- Two 120Ω terminations at physical ends
+- Shared GND across nodes
+
+## 4) Hardware Blocks per Node
+
+- MCU (same type on all nodes)
+- CAN transceiver
+- status LED
+- debug/programming header
+- optional local sensor connector
+
+Master adds:
+
+- USB-UART (or native USB) to PC Serial Monitor
+
+## 5) Software Architecture
+
+### Master firmware
+
+1. CLI Layer
+    - reads user command lines via serial
+2. Command Parser
+    - validates syntax/params
+3. Task Scheduler
+    - assigns task IDs and target workers
+4. Node Manager
+    - heartbeat tracking, online/offline state
+5. CAN Transport
+    - send commands, receive results
+6. Aggregator
+    - combines worker outputs
+7. Reporter
+    - prints progress, results, summaries
+
+### Worker firmware
+
+1. heartbeat tx
+2. task rx handler
+3. task executor (sensor/TinyML/self-test)
+4. result tx
+5. error/timeout handling
+
+## 6) Serial Command Interface (core feature)
+
+Supported commands:
+
+- `help`
+- `nodes`
+- `status`
+- `run <task> <node|all> <k=v ...>`
+- `bench <task> <iters>`
+- `stop <task_id>`
+- `log <on|off>`
+
+Examples:
+
+- `run sensor_snapshot all`
+- `run classify_sound 2 window=500`
+- `bench imu_anomaly 30`
+- `stop 1042`
+
+## 7) Distributed Task Flow
+
+1. User enters command on Serial Monitor
+2. Master parses and creates `task_id`
+3. Master dispatches over CAN
+4. Workers execute and return results
+5. Master prints:
+    - per-node result lines
+    - final summary
+    - timeout/failure notices if any node fails
+
+## 8) Message Types (protocol)
+
+- `HEARTBEAT`
+- `TASK_ASSIGN`
+- `TASK_ACK`
+- `TASK_RESULT`
+- `TASK_PROGRESS` (optional)
+- `TASK_STOP`
+- `ERROR`
+
+Key fields:
+
+- `msg_type, task_id, src, dst, task_code, seq, payload`
+
+## 9) Demo Tasks (good for school)
+
+- `ping` (latency test)
+- `self_test` (node health)
+- `sensor_snapshot` (raw sensor read)
+- `imu_anomaly` (simple threshold/feature model)
+- `classify_sound` (tiny keyword/event model)
+- `temp_trend` (windowed trend classification)
+
+## 10) Serial Output Format (clean + judge-friendly)
+
+- `OK task_id=1042 dispatched=6`
+- `PROGRESS task_id=1042 done=3/6`
+- `RESULT task_id=1042 node=3 label=normal score=0.88 latency_ms=34`
+- `SUMMARY task_id=1042 majority=normal avg_latency_ms=39`
+- `ERR task_id=1042 node=5 timeout`
+
+## 11) Fault Tolerance (important scoring point)
+
+- heartbeat every 500–1000 ms
+- offline after N missed heartbeats
+- scheduler skips offline nodes
+- partial-result completion if one worker fails
+
+## 12) Build Plan
+
+- Phase 1: 2 nodes (master + 1 worker), CLI + ping
+- Phase 2: 4 nodes, run/stop/status + heartbeat
+- Phase 3: add 1–2 real sensor tasks
+- Phase 4: scale to 6–8 nodes + benchmark mode
+- Phase 5: finalize custom PCB and presentation metrics
