@@ -9,7 +9,7 @@ git commit -m "Describe what you changed"
 git push
 
 
-
+ls /dev/cu.*
 
 
 # Architecture
