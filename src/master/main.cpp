@@ -33,6 +33,18 @@ void serialSetup(){
   Serial.println("Flash Size: " + String(ESP.getFlashChipSize() / (1024 * 1024)) + " MB");
   Serial.println("Running: ");  
 }
+bool isInt(const String& s) {
+  if (s.length() == 0) return false;
+  int i = 0;
+  if (s[0] == '-' || s[0] == '+') {
+    if (s.length() == 1) return false;
+    i = 1;
+  }
+  for (; i < s.length(); i++) {
+    if (!isDigit(s[i])) return false;
+  }
+  return true;
+}
 
 void setup() {
   Serial.begin(115200);
@@ -60,12 +72,7 @@ void loop() {
     char* p3 = strtok(nullptr, " ");
     char* extra = strtok(nullptr, " ");
 
-    cmd = String(p1);
-    arg = String(p2);
-    flag = String(p3);
-    ext = String(extra);
-
-    //nullptr checks via string tokenizer return
+    //run mullptr checks via string tokenizer return
     if (p1 == nullptr || p2 == nullptr || p3 == nullptr) {
       Serial.println("Err: too few arguments. Format: <cmd> <arg> <flag>");
       return;
@@ -76,43 +83,39 @@ void loop() {
       return;
     }
 
+    //set easily referencable strings to use in command logic
+    cmd = String(p1);
+    arg = String(p2);
+    flag = String(p3);
+
+
     if(cmd.equals("ping")){
-      if(arg.equals("n1")){
-        ping(1,0);
-      }else if(arg.equals("n2") && flag.equals("-")){
-        ping(2,0);
-      }else if(arg.equals("n3") && flag.equals("-")){
-        ping(2,0);
-      }else if(arg.equals("n4") && flag.equals("-")){
-        ping(2,0);
-      }else if(arg.equals("n5") && flag.equals("-")){
-        ping(2,0);
-      }else if(arg.equals("n6") && flag.equals("-")){
-        ping(2,0);
+      if(isInt(arg)){
+        ping(arg.toInt(),0);
       }else if(arg.equals("all") && flag.equals("-")){
         ping(0,1);
       }else if(arg.equals("help") && flag.equals("-")){
         Serial.println("Functionality: ping nodes 1-6 or all nodes on CAN bus");
         Serial.println("Input Format: ping <n#> <->");
-        Serial.println("Ex1: ping n1 -");
+        Serial.println("Ex1: ping 1 -");
         Serial.println("Ex2: ping all -");
         Serial.println("Output: Returns byte with node status: 0 = offline, 1 = online");
-        Serial.println("Output Ex: 0b01111111 = all nodes online \n0b00000001 = node 1 online \n 0b10000000 = input/logic error");
+        Serial.println("Output Ex: 0b01111111 = all nodes online \n0b00000001 = master online\n0b00000010 = node1 online \n 0b10000000 = input/logic error");
       }else{
         Serial.println("Err: arguement '"+arg+"' unknown");
       }
-    if(cmd.equals("blink")){
 
-    }
-
+    }else if(cmd.equals("blink")){
+      if(arg.equals("master")){
+        blink(0,flag.toInt());
+      }else{
+        blink(arg.toInt(), flag.toInt());
+      }
     }else{
       Serial.println("Err: command '"+cmd+"' unknown");
-    }
-
-    
+    }   
   }
-
-}
+} 
 
 // put function definitions here:
 int myFunction(int x, int y) {
