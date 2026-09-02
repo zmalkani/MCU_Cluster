@@ -181,9 +181,6 @@ void loop() {
           Serial.print(task6+": ");
           if(statusArray[2]==1){Serial.println("live");}else{Serial.println("inactive");}
           }
-
-
-        
         }
       }  
     }else{

@@ -1,4 +1,5 @@
-#include "globals.h"
+#include <Arduino.h>
+#include <globals.h>
 
 String task1 = "task1";
 String task2 = "task2";
