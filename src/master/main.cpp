@@ -76,9 +76,40 @@ void loop() {
       return;
     }
 
-    if(input.equals("test")){
-      test();
+    if(cmd.equals("ping")){
+      if(arg.equals("n1")){
+        ping(1,0);
+      }else if(arg.equals("n2") && flag.equals("-")){
+        ping(2,0);
+      }else if(arg.equals("n3") && flag.equals("-")){
+        ping(2,0);
+      }else if(arg.equals("n4") && flag.equals("-")){
+        ping(2,0);
+      }else if(arg.equals("n5") && flag.equals("-")){
+        ping(2,0);
+      }else if(arg.equals("n6") && flag.equals("-")){
+        ping(2,0);
+      }else if(arg.equals("all") && flag.equals("-")){
+        ping(0,1);
+      }else if(arg.equals("help") && flag.equals("-")){
+        Serial.println("Functionality: ping nodes 1-6 or all nodes on CAN bus");
+        Serial.println("Input Format: ping <n#> <->");
+        Serial.println("Ex1: ping n1 -");
+        Serial.println("Ex2: ping all -");
+        Serial.println("Output: Returns byte with node status: 0 = offline, 1 = online");
+        Serial.println("Outpit Ex: 0b01111111 = all nodes online \n0b00000001 = node 1 online \n 0b10000000 = all nodes offline (-1 error)");
+      }else{
+        Serial.println("Err: arguement '"+arg+"' unknown");
+      }
+    if(cmd.equals("blink")){
+
     }
+
+    }else{
+      Serial.println("Err: command '"+cmd+"' unknown");
+    }
+
+    
   }
 
 }

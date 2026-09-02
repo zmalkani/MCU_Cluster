@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "author": "MCU-Cluster",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-s3-devkitc-1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led16",
+      "top": -70,
+      "left": 230,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led17",
+      "top": 0,
+      "left": 230,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led18",
+      "top": 70,
+      "left": 230,
+      "attrs": { "color": "blue" }
+    }
+  ],
+  "connections": [
+    [ "esp:16", "led16:A", "red", [] ],
+    [ "led16:C", "esp:GND.1", "black", [] ],
+    [ "esp:17", "led17:A", "green", [] ],
+    [ "led17:C", "esp:GND.1", "black", [] ],
+    [ "esp:18", "led18:A", "blue", [] ],
+    [ "led18:C", "esp:GND.1", "black", [] ]
+  ],
+  "serialMonitor": {
+    "display": "auto"
+  }
+}
