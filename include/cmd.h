@@ -1,5 +1,6 @@
-#pragma once
+#pragma once //compile once only
 #include <Arduino.h>
+#include <globals.h>
 
 inline void test() {
     digitalWrite(16, HIGH);
@@ -41,3 +42,21 @@ inline void blink(int n, int millis){
         Serial.println("Blink Success");
     }
 }
+
+inline byte status(int n){
+    byte statusByte = 0b10000000;
+    /*
+    status return type breakdown:
+    0b00000000
+    0b      0      0       0       0       0       0       0       0
+           err    idle  task6  task5    task4   task3   task2   task1
+    */
+    if(n == 0){
+        return 0b01000000;
+    }else{
+        //send status request to node "n" ID via CAN bus and return status byte
+        return statusByte;
+    }
+    
+}
+

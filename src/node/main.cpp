@@ -1,4 +1,8 @@
 #include <Arduino.h>
+#include <globals.h>
+
+
+boolean taskRunning = false;
 
 // put function declarations here:
 int myFunction(int, int);
