@@ -15,9 +15,9 @@ inline int ping(int n, int type){
     if(type == 1){
         //get all node status via CAN bus
         Serial.println("Pinging node "+(String)n+"...");
-    else if(type == 0){
+    }else if(type == 0){
         //get node_n status via CAN bus
-        Serial.println("Pinging all nodes..")
+        Serial.println("Pinging all nodes..");
     }else{
         liveNodes = 0b10000000;
     }

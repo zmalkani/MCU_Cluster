@@ -97,7 +97,7 @@ void loop() {
         Serial.println("Ex1: ping n1 -");
         Serial.println("Ex2: ping all -");
         Serial.println("Output: Returns byte with node status: 0 = offline, 1 = online");
-        Serial.println("Outpit Ex: 0b01111111 = all nodes online \n0b00000001 = node 1 online \n 0b10000000 = all nodes offline (-1 error)");
+        Serial.println("Output Ex: 0b01111111 = all nodes online \n0b00000001 = node 1 online \n 0b10000000 = input/logic error");
       }else{
         Serial.println("Err: arguement '"+arg+"' unknown");
       }
