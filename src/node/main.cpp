@@ -1,14 +1,13 @@
 #include <Arduino.h>
 #include <globals.h>
+#include <cstring>
 
+char nodeID = '1';
 
 boolean taskRunning = false;
 
-// put function declarations here:
-int myFunction(int, int);
-
 void setup() {
-  // put your setup code here, to run once:
+  
   
 }
 

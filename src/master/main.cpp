@@ -3,7 +3,7 @@
 #include <globals.h>
 #include <cstring> 
 
-char nodeID = 'M';
+char nodeID = '0';
 String ascii = "     __  ___________  __                    \n"
                 "   /  |/  / ____/ / / /                    \n"
                 "  / /|_/ / /   / / / /                     \n"
@@ -21,6 +21,18 @@ String flag = "";
 String ext = "";
 boolean taskRunning = false;
 boolean prompted = false;
+uint8_t lnDelay = 100;
+
+//terminal print functions with microdelay
+void terminalPrintln(String i){
+  delay(100);
+  Serial.println(i);
+}
+
+void terminalPrint(String i){
+  delay(100);
+  Serial.print(i);
+}
 
 void serialSetup(){
   //serial setup output
@@ -37,9 +49,9 @@ void serialSetup(){
   Serial.println("Running: ");  
 }
 bool isInt(const String& s) {
-  if (s.length() == 0) return false;
+  if (s.length() == 0) return false; // int must be existent to return 1
   int i = 0;
-  if (s[0] == '-' || s[0] == '+') {
+  if (s[0] == '-' || s[0] == '+') { //negative/positive
     if (s.length() == 1) return false;
     i = 1;
   }
@@ -54,7 +66,7 @@ void printByteBinary(byte value) {
   for (int i = 7; i >= 0; i--) {
     Serial.print((value >> i) & 0x01);
   }
-  Serial.println();
+  terminalPrintln(" ");
 }
 
 void setup() {
@@ -64,15 +76,29 @@ void setup() {
   pinMode(16, OUTPUT);
   pinMode(17, OUTPUT);
   pinMode(18, OUTPUT);
-
+  pinMode(35, OUTPUT);
+  //startup status blinks
+  for (int i =0; i < 3; i++){
+    digitalWrite(16,HIGH);
+    delay(100);
+    digitalWrite(17,HIGH);
+    delay(100);
+    digitalWrite(18,HIGH);
+    delay(100);
+    digitalWrite(35,HIGH);
+    delay(100);
+    //turn all off
+    digitalWrite(16,LOW);
+    digitalWrite(17,LOW);
+    digitalWrite(18,LOW);
+    digitalWrite(35,LOW);
+  }
   serialSetup();
-  
-
 }
 
 void loop() {
   if(!prompted){
-    Serial.print("-> master: ");
+    terminalPrint("-> master: ");
     prompted = true;
   }
   if(Serial.available()){
@@ -91,13 +117,13 @@ void loop() {
 
     //run mullptr checks via string tokenizer return
     if (p1 == nullptr || p2 == nullptr || p3 == nullptr) {
-      Serial.println("Err: too few arguments. Format: <cmd> <arg> <flag>");
+      terminalPrintln("Err: too few arguments. Format: <cmd> <arg> <flag>");
       prompted = false;
       return;
     }
 
     if (extra != nullptr) {
-      Serial.println("Err: too many arguments. Format: <cmd> <arg> <flag>");
+      terminalPrintln("Err: too many arguments. Format: <cmd> <arg> <flag>");
       prompted = false;
       return;
     }
@@ -114,14 +140,14 @@ void loop() {
       }else if(arg.equals("all")){
         printByteBinary(ping(0,1));           //ping all nodes with type 1 (all node ping)
       }else if(arg.equals("help")){
-        Serial.println("Functionality: ping nodes 1-6 or all nodes on CAN bus");
-        Serial.println("Input Format: ping <n#> <->");
-        Serial.println("Ex1: ping 1 -");
-        Serial.println("Ex2: ping all -");
-        Serial.println("Output: Returns byte with node status: 0 = offline, 1 = online");
-        Serial.println("Output Ex: 0b01111111 = all nodes online \n0b00000001 = master online\n0b00000010 = node1 online \n 0b10000000 = input/logic error");
+        terminalPrintln("Functionality: ping nodes 1-6 or all nodes on CAN bus");
+        terminalPrintln("Input Format: ping <n#> <->");
+        terminalPrintln("Ex1: ping 1 -");
+        terminalPrintln("Ex2: ping all -");
+        terminalPrintln("Output: Returns byte with node status: 0 = offline, 1 = online");
+        terminalPrintln("Output Ex: 0b01111111 = all nodes online \n0b00000001 = master online\n0b00000010 = node1 online \n 0b10000000 = input/logic error");
       }else{
-        Serial.println("Err: argument '"+arg+"' unknown");
+        terminalPrintln("Err: argument '"+arg+"' unknown");
       }
 
     }else if(cmd.equals("blink")){ // blink
@@ -129,15 +155,15 @@ void loop() {
       if(arg.equals("master")){
         blink(0,flag.toInt());
       }else if(arg.equals("help")){
-        Serial.println("Functionality: blink nodes 1-6 or master node on CAN bus");
-        Serial.println("Input Format: blink <n#> <millis>");
-        Serial.println("Ex1: blink 1 1000");
-        Serial.println("Ex2: blink master 500");
-        Serial.println("Output: Blinks node_n or master node for <millis> milliseconds");
+        terminalPrintln("Functionality: blink nodes 1-6 or master node on CAN bus");
+        terminalPrintln("Input Format: blink <n#> <millis>");
+        terminalPrintln("Ex1: blink 1 1000");
+        terminalPrintln("Ex2: blink master 500");
+        terminalPrintln("Output: Blinks node_n or master node for <millis> milliseconds");
       }else if(isInt(arg)){
         blink(arg.toInt(), flag.toInt());
       }else{
-        Serial.println("Err: argument '"+arg+"' unknown");
+        terminalPrintln("Err: argument '"+arg+"' unknown");
       }
 
     }else if(cmd.equals("status")){ //status
@@ -155,22 +181,22 @@ void loop() {
         }
 
         if(statusArray[0] == 1){
-          Serial.println("Err: 0b10000000 \n command fetched master node status or node not live. ping to verify node health");
+          terminalPrintln("Err: 0b10000000 \n command fetched master node status or node not live. ping to verify node health");
         }else if(statusArray[1] == 1){
-          Serial.println("Node "+arg+" currently idle.");
+          terminalPrintln("Node "+arg+" currently idle.");
         }else{
-          Serial.print(task1+": ");
-          if(statusArray[7]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task2+": ");
-          if(statusArray[6]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task3+": ");
-          if(statusArray[5]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task4+": ");
-          if(statusArray[4]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task5+": ");
-          if(statusArray[3]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task6+": ");
-          if(statusArray[2]==1){Serial.println("live");}else{Serial.println("inactive");}
+          terminalPrint(task1+": ");
+          if(statusArray[7]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task2+": ");
+          if(statusArray[6]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task3+": ");
+          if(statusArray[5]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task4+": ");
+          if(statusArray[4]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task5+": ");
+          if(statusArray[3]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task6+": ");
+          if(statusArray[2]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
 
         }
 
@@ -184,28 +210,28 @@ void loop() {
           }
 
           if(statusArray[0] == 1){
-          Serial.println("Err: 0b10000000 \n command fetched master node status or node not live. ping to verify node health");
+          terminalPrintln("Err: 0b10000000 \n command fetched master node status or node not live. ping to verify node health");
           }else if(statusArray[1] == 1){
-          Serial.println("Node "+(String)i+" currently idle.");
+          terminalPrintln("Node "+(String)i+" currently idle.");
           }else{
-          Serial.print(task1+": ");
-          if(statusArray[7]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task2+": ");
-          if(statusArray[6]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task3+": ");
-          if(statusArray[5]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task4+": ");
-          if(statusArray[4]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task5+": ");
-          if(statusArray[3]==1){Serial.println("live");}else{Serial.println("inactive");}
-          Serial.print(task6+": ");
-          if(statusArray[2]==1){Serial.println("live");}else{Serial.println("inactive");}
+          terminalPrint(task1+": ");
+          if(statusArray[7]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task2+": ");
+          if(statusArray[6]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task3+": ");
+          if(statusArray[5]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task4+": ");
+          if(statusArray[4]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task5+": ");
+          if(statusArray[3]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
+          terminalPrint(task6+": ");
+          if(statusArray[2]==1){terminalPrintln("live");}else{terminalPrintln("inactive");}
           }
         }
       }  
     }else{
       prompted = false;
-      Serial.println("Err: command '"+cmd+"' unknown");
+      terminalPrintln("Err: command '"+cmd+"' unknown");
     }   
   }
 }

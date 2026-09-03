@@ -4,8 +4,10 @@
 
 inline void test() {
     digitalWrite(16, HIGH);
+    digitalWrite(35, HIGH);
     delay(200);
     digitalWrite(16, LOW);
+    digitalWrite(35, HIGH);
     Serial.println("Test Success");
     
 
@@ -33,8 +35,10 @@ inline void blink(int n, int millis){
     if(n == 0){
         Serial.println("Blinking master node...");
         digitalWrite(16, HIGH);
+        digitalWrite(35, HIGH);
         delay(millis);
         digitalWrite(16, LOW);
+        digitalWrite(35, LOW);
         Serial.println("Blink Success");
     }else{
         Serial.println("Blinking node "+(String)n+"...");
