@@ -10,7 +10,7 @@ String ascii = "     __  ___________  __                    \n"
                 " / /  / / /___/ /_/ /                      \n"
                 "/_/__/_/\\____/\\____/______________________ \n"
                 "  / ____/ /   / / / / ___/_  __/ ____/ __ \\ \n"
-                " / /   / /   / / / /\\__ \\ / / / __/ / /_/ / \n"
+                " / /   / /   / / / /\\__ \\ / / / __/ / /_/ / \n" 
                 "/ /___/ /___/ /_/ /___/ // / / /___/ _, _/  \n"
                 "\\____/_____/\\____//____//_/ /_____/_/ |_|  ";
                                                           
@@ -49,8 +49,17 @@ bool isInt(const String& s) {
   return true;
 }
 
+void printByteBinary(byte value) {
+  Serial.print("0b");
+  for (int i = 7; i >= 0; i--) {
+    Serial.print((value >> i) & 0x01);
+  }
+  Serial.println();
+}
+
 void setup() {
   Serial.begin(115200);
+  Serial.setTimeout(15000);
 
   pinMode(16, OUTPUT);
   pinMode(17, OUTPUT);
@@ -58,18 +67,19 @@ void setup() {
 
   serialSetup();
   
+
 }
 
 void loop() {
   if(!prompted){
-    Serial.println("-> master: ");
+    Serial.print("-> master: ");
     prompted = true;
   }
   if(Serial.available()){
     input = Serial.readStringUntil('\n');
     input.trim();
 
-    char buf[64];
+    char buf[256];
     input.toCharArray(buf, sizeof(buf)); //input string to charArray
 
     //parse input array with string tokenizer and save as char* pointer (return type of strtrok)
@@ -82,11 +92,13 @@ void loop() {
     //run mullptr checks via string tokenizer return
     if (p1 == nullptr || p2 == nullptr || p3 == nullptr) {
       Serial.println("Err: too few arguments. Format: <cmd> <arg> <flag>");
+      prompted = false;
       return;
     }
 
     if (extra != nullptr) {
       Serial.println("Err: too many arguments. Format: <cmd> <arg> <flag>");
+      prompted = false;
       return;
     }
 
@@ -98,9 +110,9 @@ void loop() {
     if(cmd.equals("ping")){ //ping
       prompted = false;
       if(isInt(arg)){
-        Serial.println(""+(String)ping(arg.toInt(),0)); //ping node with type 0 (single node ping)
+        printByteBinary(ping(arg.toInt(),0)); //ping node with type 0 (single node ping)
       }else if(arg.equals("all")){
-        Serial.println(""+(String)ping(0,1));           //ping all nodes with type 1 (all node ping)
+        printByteBinary(ping(0,1));           //ping all nodes with type 1 (all node ping)
       }else if(arg.equals("help")){
         Serial.println("Functionality: ping nodes 1-6 or all nodes on CAN bus");
         Serial.println("Input Format: ping <n#> <->");
@@ -116,8 +128,16 @@ void loop() {
       prompted = false;
       if(arg.equals("master")){
         blink(0,flag.toInt());
-      }else{
+      }else if(arg.equals("help")){
+        Serial.println("Functionality: blink nodes 1-6 or master node on CAN bus");
+        Serial.println("Input Format: blink <n#> <millis>");
+        Serial.println("Ex1: blink 1 1000");
+        Serial.println("Ex2: blink master 500");
+        Serial.println("Output: Blinks node_n or master node for <millis> milliseconds");
+      }else if(isInt(arg)){
         blink(arg.toInt(), flag.toInt());
+      }else{
+        Serial.println("Err: argument '"+arg+"' unknown");
       }
 
     }else if(cmd.equals("status")){ //status
