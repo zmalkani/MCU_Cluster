@@ -3,6 +3,8 @@
 #include <globals.h>
 #include <cstring> 
 
+#include "driver/twai.h"
+
 char nodeID = '0';
 String ascii = "     __  ___________  __                    \n"
                 "   /  |/  / ____/ / / /                    \n"
@@ -22,6 +24,11 @@ String ext = "";
 boolean taskRunning = false;
 boolean prompted = false;
 uint8_t lnDelay = 100;
+
+//CAN defs
+unsigned long lastTransmitTime = 0;
+uint8_t counter = 0;
+
 
 //terminal print functions with microdelay
 void terminalPrintln(String i){
@@ -71,7 +78,12 @@ void printByteBinary(byte value) {
 
 void setup() {
   Serial.begin(115200);
-  Serial.setTimeout(15000);
+  //Serial.setTimeout(15000);
+
+  twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(TX_PIN, RX_PIN, TWAI_MODE_NORMAL);
+  twai_timing_config_t t_config = TWAI_TIMING_CONFIG_125KBITS(); // Set bus speed to 500 kbps
+  twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
+
 
   pinMode(16, OUTPUT);
   pinMode(17, OUTPUT);
@@ -145,7 +157,7 @@ void loop() {
         terminalPrintln("Ex1: ping 1 -");
         terminalPrintln("Ex2: ping all -");
         terminalPrintln("Output: Returns byte with node status: 0 = offline, 1 = online");
-        terminalPrintln("Output Ex: 0b01111111 = all nodes online \n0b00000001 = master online\n0b00000010 = node1 online \n 0b10000000 = input/logic error");
+        terminalPrintln("Output Ex: \n 0b01111111 = all nodes online \n0b00000001 = master online\n0b00000010 = node1 online \n0b10000000 = input/logic error");
       }else{
         terminalPrintln("Err: argument '"+arg+"' unknown");
       }
