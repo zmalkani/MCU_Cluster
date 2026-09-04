@@ -168,7 +168,7 @@ void loop() {
 
     if(cmd.equals("ping")){ //ping
       prompted = false;
-      if(arg.toInt() == 1 || arg.toInt() == 2 || arg.toInt() == 3 || arg.toInt() == 4 || arg.toInt() == 5 || arg.toInt() == 6){
+      if(arg.toInt() == 0 || arg.toInt() == 1 || arg.toInt() == 2 || arg.toInt() == 3 || arg.toInt() == 4 || arg.toInt() == 5 || arg.toInt() == 6){
         printByteBinary(ping(arg.toInt(),0)); //ping node with type 0 (single node ping)
       }else if(arg.equals("all")){
         printByteBinary(ping(0,1));           //ping all nodes with type 1 (all node ping)
