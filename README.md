@@ -104,7 +104,7 @@ Master adds:
 4. result tx
 5. error/timeout handling
 
-## 6) Serial Command Interface (core feature)
+## 6) Serial CLI
 
 Supported commands:
 
@@ -148,7 +148,7 @@ Key fields:
 
 - `msg_type, task_id, src, dst, task_code, seq, payload`
 
-## 9) Demo Tasks (good for school)
+## 9) Demo Tasks
 
 - `ping` (latency test)
 - `self_test` (node health)
@@ -157,7 +157,7 @@ Key fields:
 - `classify_sound` (tiny keyword/event model)
 - `temp_trend` (windowed trend classification)
 
-## 10) Serial Output Format (clean + judge-friendly)
+## 10) Serial Output Format 
 
 - `OK task_id=1042 dispatched=6`
 - `PROGRESS task_id=1042 done=3/6`
@@ -165,7 +165,7 @@ Key fields:
 - `SUMMARY task_id=1042 majority=normal avg_latency_ms=39`
 - `ERR task_id=1042 node=5 timeout`
 
-## 11) Fault Tolerance (important scoring point)
+## 11) Fault Tolerance
 
 - heartbeat every 500–1000 ms
 - offline after N missed heartbeats
