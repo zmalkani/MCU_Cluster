@@ -10,8 +10,6 @@ inline void test() {
     digitalWrite(16, LOW);
     digitalWrite(35, HIGH);
     Serial.println("Test Success");
-    
-
 }
 
 inline int ping(int n, int type){
@@ -42,7 +40,26 @@ inline int ping(int n, int type){
     }else{
         liveNodes = 0b10000000;
     }
-    return liveNodes;
+
+    twai_message_t rx_msg;
+    if (twai_receive(&rx_msg, pdMS_TO_TICKS(50)) == ESP_OK) {
+
+    //step1: Check if this message was sent to this node via data[0] (the first byte of the message)
+    if (rx_msg.data[0] == 0x00) {
+      
+      //step2: Read the command stored in data[1]
+      uint8_t pingedID = rx_msg.data[1];
+      
+      if(pingedID == targID){
+        for(int i = 0; i < 8; i++){ //convert statusByte into array
+          liveNodes |= (rx_msg.data[2] >> (7 - i) & 0x01); //
+        }
+      }
+    }
+
+
+ } 
+ return liveNodes;
 }
 
 inline void blink(int n, int millis){
@@ -56,8 +73,25 @@ inline void blink(int n, int millis){
         Serial.println("Blink Success");
     }else{
         Serial.println("Blinking node "+(String)n+"...");
+        
         //send blink command to node_n via CAN bus
-        Serial.println("Blink Success");
+
+        //convert to seconds to fit in byte format
+        millis = millis/1000;
+
+        twai_message_t msg;
+        msg.identifier = 0x00;        // Universal Master Command ID
+        msg.extd = 0;
+        msg.data_length_code = 4; // 4 bytes of data
+        msg.data[0] = (uint8_t)n;    // Byte 0 specifies destination (e.g., 3)
+        msg.data[1] = 2;         // Byte 1 specifies command
+        msg.data[2] = (uint8_t)millis;  
+        msg.data[3] = 0;  
+
+        twai_transmit(&msg, pdMS_TO_TICKS(100));
+
+
+        Serial.println("Blink Sent to Node"+(String)n);
     }
 }
 

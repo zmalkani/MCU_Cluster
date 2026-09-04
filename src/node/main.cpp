@@ -33,9 +33,9 @@ void setup() {
 
 
 
-  pinMode(16, OUTPUT);
-  pinMode(17, OUTPUT);
-  pinMode(18, OUTPUT);
+  pinMode(16, OUTPUT); // blink/utility LED
+  pinMode(17, OUTPUT); // status LED
+  pinMode(18, OUTPUT); // error LED
   pinMode(35, OUTPUT);
   //startup status blinks
   for (int i =0; i < 3; i++){
@@ -69,6 +69,8 @@ void loop() {
       uint8_t arg = rx_msg.data[2]; 
       uint8_t flag = rx_msg.data[3]; 
 
+      uint16_t blinkDuration = arg * 1000; // Convert seconds to milliseconds
+
       /*
      NOTE FOR FUTURE ZACH: Remember that this is setup right now
       to expect 4 bytes in each msg. HOWEVER, if not all 4 bytes
@@ -79,14 +81,14 @@ void loop() {
       //step3: repeat what happened when it was typed in on master node!
       twai_message_t msg; //declare msg once and use for all cases
       switch (cmd) {
-        case 1:
+        case 1: // ping command
           
           
           msg.identifier = nodeID;       
           msg.extd = 0;
           msg.data_length_code = 4; // 4 bytes of data
           msg.data[0] = 0x00;    //return to sender!
-          msg.data[1] = nodeID;         // returns this nodesID, meaning this node is in fact live
+          msg.data[1] = nodeID;  // returns this nodesID, meaning this node is in fact live
           msg.data[2] = 0;
           msg.data[3] = 0;
           twai_transmit(&msg, pdMS_TO_TICKS(100));
@@ -94,12 +96,13 @@ void loop() {
           delay(100);
           digitalWrite(17,LOW);
           break;
-        /*
-        case 2:
-          Serial.println("Command Received: Turning LED ON");
-          digitalWrite(LED_BUILTIN, HIGH);
-          break;
         
+        case 2: //blink command
+          digitalWrite(16, HIGH);
+          delay(blinkDuration);
+          digitalWrite(16, LOW);
+          break;
+        /*
         case 3:
           Serial.println("Command Received: Turning LED OFF");
           digitalWrite(LED_BUILTIN, LOW);

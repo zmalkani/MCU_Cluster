@@ -41,7 +41,14 @@ Node3: 0x03... and so on.
 last updated section Sep3 10:19pm
 
 
+# LED Guide
 
+
+BLUE  -> pin 16: blink/utility LED
+
+GREEN -> pin 17: status LED
+
+RED   -> pin 18: error LED
 
 
 # Architecture
