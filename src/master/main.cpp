@@ -168,17 +168,21 @@ void loop() {
 
     if(cmd.equals("ping")){ //ping
       prompted = false;
-      if(arg.toInt() == 0 || arg.toInt() == 1 || arg.toInt() == 2 || arg.toInt() == 3 || arg.toInt() == 4 || arg.toInt() == 5 || arg.toInt() == 6){
-        printByteBinary(ping(arg.toInt(),0)); //ping node with type 0 (single node ping)
-      }else if(arg.equals("all")){
-        printByteBinary(ping(0,1));           //ping all nodes with type 1 (all node ping)
+      if(arg.equals("all")){
+        for(int i = 0; i <= 6; i++){
+          terminalPrintln((String)ping(i,0)); //ping all nodes with type 0 (single node ping)
+        }
+      
+      }else if(isInt(arg) && arg.toInt() >= 0 && arg.toInt() <= 6){
+        terminalPrintln((String)ping(arg.toInt(),0)); //ping node with type 0 (single node ping)
+
       }else if(arg.equals("help")){
         terminalPrintln("Functionality: ping nodes 1-6 or all nodes on CAN bus");
         terminalPrintln("Input Format: ping <n#> <->");
         terminalPrintln("Ex1: ping 1 -");
         terminalPrintln("Ex2: ping all -");
-        terminalPrintln("Output: Returns byte with node status: 0 = offline, 1 = online");
-        terminalPrintln("Output Ex: \n 0b01111111 = all nodes online \n0b00000001 = master online\n0b00000010 = node1 online \n0b10000000 = input/logic error");
+        terminalPrintln("Output: Returns byte with live node ID");
+        terminalPrintln("Output: 255 = no node found,\n0 = master node (self test),\n1-6 = live node ID");
       }else{
         terminalPrintln("Err: argument '"+arg+"' unknown");
       }
