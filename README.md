@@ -1,6 +1,6 @@
 
 
-Node to Node Communications:
+# Node to Node Communications:
 
 When messages are sent from node to node they are done so in this 4 byte format:
 
@@ -14,7 +14,7 @@ byte3: argument
 byte4: flag
 
 
-Recipient IDs are as follows:
+# Recipient IDs are as follows:
 
 
 Master: 0x00
@@ -26,7 +26,7 @@ Node2: 0x02
 Node3: 0x03... and so on.
 
 
-Command codes are also sent as follows :
+# Command codes are also sent as follows :
 (integer form, but sent as bytes)
 
 1 -> ping
