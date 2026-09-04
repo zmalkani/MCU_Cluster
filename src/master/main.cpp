@@ -5,7 +5,7 @@
 
 #include "driver/twai.h"
 
-char nodeID = '0';
+char nodeID = 0x00;
 String ascii = "     __  ___________  __                    \n"
                 "   /  |/  / ____/ / / /                    \n"
                 "  / /|_/ / /   / / / /                     \n"
@@ -24,6 +24,7 @@ String ext = "";
 boolean taskRunning = false;
 boolean prompted = false;
 uint8_t lnDelay = 100;
+
 
 //CAN defs
 unsigned long lastTransmitTime = 0;
@@ -46,7 +47,7 @@ void serialSetup(){
   Serial.println(ascii);
   Serial.println("Node: " + String(nodeID));
   Serial.println("ESP32-S3");
-  Serial.println("-----------------------------");
+  Serial.println("----------------------------------------------");
   Serial.println("Core: " + String(ESP.getCoreVersion()));
   Serial.println("Chip: " + String(ESP.getChipModel()));
   Serial.println("Cores: " + String(ESP.getChipCores()));
@@ -54,6 +55,7 @@ void serialSetup(){
   Serial.println("CPU Freq: " + String(ESP.getCpuFreqMHz()) + " MHz");
   Serial.println("Flash Size: " + String(ESP.getFlashChipSize() / (1024 * 1024)) + " MB");
   Serial.println("Running: ");  
+  Serial.println("----------------------------------------------");  
 }
 bool isInt(const String& s) {
   if (s.length() == 0) return false; // int must be existent to return 1
@@ -78,11 +80,27 @@ void printByteBinary(byte value) {
 
 void setup() {
   Serial.begin(115200);
-  //Serial.setTimeout(15000);
+  Serial.setTimeout(40000);
 
-  twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(TX_PIN, RX_PIN, TWAI_MODE_NORMAL);
-  twai_timing_config_t t_config = TWAI_TIMING_CONFIG_125KBITS(); // Set bus speed to 500 kbps
+  // NOTE: GPIO 43/44 are UART0 (serial monitor + flashing) - do NOT use for TWAI
+  twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_4, GPIO_NUM_5, TWAI_MODE_NORMAL);
+  twai_timing_config_t t_config = TWAI_TIMING_CONFIG_125KBITS(); // Set bus speed to 125 kbps
   twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
+  
+  // Install and start TWAI driver
+  if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK) {
+    Serial.println("TWAI Driver installed successfully.");
+  } else {
+    Serial.println("Failed to install TWAI driver.");
+    return;
+  }
+
+  if (twai_start() == ESP_OK) {
+    Serial.println("TWAI Driver started successfully.");
+  } else {
+    Serial.println("Failed to start TWAI driver.");
+    return;
+  }
 
 
   pinMode(16, OUTPUT);
@@ -115,6 +133,9 @@ void loop() {
   }
   if(Serial.available()){
     input = Serial.readStringUntil('\n');
+    digitalWrite(35,HIGH);
+    delay(100);
+    digitalWrite(35,LOW);
     input.trim();
 
     char buf[256];
@@ -147,7 +168,7 @@ void loop() {
 
     if(cmd.equals("ping")){ //ping
       prompted = false;
-      if(isInt(arg)){
+      if(arg.toInt() == 1 || arg.toInt() == 2 || arg.toInt() == 3 || arg.toInt() == 4 || arg.toInt() == 5 || arg.toInt() == 6){
         printByteBinary(ping(arg.toInt(),0)); //ping node with type 0 (single node ping)
       }else if(arg.equals("all")){
         printByteBinary(ping(0,1));           //ping all nodes with type 1 (all node ping)

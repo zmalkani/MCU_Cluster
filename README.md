@@ -12,6 +12,32 @@ git push
 ls /dev/cu.*
 
 
+Node to Node Communications:
+When messages are sent from node to node they are done so in this 4 byte format:
+
+byte1: recipient ID
+byte2: command
+byte3: argument
+byte4: flag
+
+Recipient IDs are as follows:
+Master: 0x00
+Node1: 0x01
+Node2: 0x02
+Node3: 0x03... and so on.
+
+Command codes are also sent as follows :
+(integer form, but sent as bytes)
+1 -> ping
+2 -> blink
+3 -> status
+255 -> err/major mishap (0xFF)
+last updated section Sep3 10:19pm
+
+
+
+
+
 # Architecture
 
 ## 1) System Concept

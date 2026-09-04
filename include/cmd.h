@@ -1,6 +1,7 @@
 #pragma once //compile once only
 #include <Arduino.h>
 #include <globals.h>
+#include "driver/twai.h"
 
 inline void test() {
     digitalWrite(16, HIGH);
@@ -15,6 +16,7 @@ inline void test() {
 
 inline int ping(int n, int type){
     byte liveNodes = 0b00000000;
+    uint8_t targID = n;
     if(n == 0){
         Serial.println("Pinging master (self)...");
         liveNodes = 0b00000001;
@@ -24,6 +26,18 @@ inline int ping(int n, int type){
         Serial.println("Pinging node "+(String)n+"...");
     }else if(type == 0){
         //get node_n status via CAN bus
+        twai_message_t msg;
+        msg.identifier = 0x00;        // Universal Master Command ID
+        msg.extd = 0;
+        msg.data_length_code = 4; // 4 bytes of data
+        msg.data[0] = targID;    // Byte 0 specifies destination (e.g., 3)
+        msg.data[1] = 1;         // Byte 1 specifies command
+        msg.data[2] = 0;  
+        msg.data[3] = 0;  
+
+        twai_transmit(&msg, pdMS_TO_TICKS(100));
+
+
         Serial.println("Pinging all nodes..");
     }else{
         liveNodes = 0b10000000;
