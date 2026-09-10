@@ -48,7 +48,7 @@ void serialSetup(){
   Serial.println("Node: " + String(nodeID));
   Serial.println("ESP32-S3");
   Serial.println("----------------------------------------------");
-  Serial.println("Core: " + String(ESP.getCoreVersion()));
+  Serial.println("Frequency: " + String(ESP.getCpuFreqMHz()) + " MHz");
   Serial.println("Chip: " + String(ESP.getChipModel()));
   Serial.println("Cores: " + String(ESP.getChipCores()));
   Serial.println("Revision: " + String(ESP.getChipRevision()));
