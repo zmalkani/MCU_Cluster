@@ -44,11 +44,11 @@ last updated section Sep3 10:19pm
 # LED Guide
 
 
-BLUE  -> pin 16: blink/utility LED
+BLUE  -> pin 16: blink/utility LED (3)
 
-GREEN -> pin 17: status LED
+GREEN -> pin 17: status LED (2)
 
-RED   -> pin 18: error LED
+RED   -> pin 18: error LED (1)
 
 
 # Architecture
