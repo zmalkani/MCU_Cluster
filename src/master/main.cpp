@@ -5,12 +5,13 @@
 
 #include "driver/twai.h"
 
-char nodeID = 0x00;
-String ascii = "     __  ___________  __                    \n"
+char nodeID = 0;
+String ascii = "    ___ ___________  __                    \n"
                 "   /  |/  / ____/ / / /                    \n"
                 "  / /|_/ / /   / / / /                     \n"
                 " / /  / / /___/ /_/ /                      \n"
-                "/_/__/_/\\____/\\____/______________________ \n"
+                "/_/  /_/\\____/\\____/ \n"
+                "   _______     _ _ _ _____ _____ _____ ___\n"
                 "  / ____/ /   / / / / ___/_  __/ ____/ __ \\ \n"
                 " / /   / /   / / / /\\__ \\ / / / __/ / /_/ / \n" 
                 "/ /___/ /___/ /_/ /___/ // / / /___/ _, _/  \n"
@@ -45,7 +46,8 @@ void terminalPrint(String i){
 void serialSetup(){
   //serial setup output
   Serial.println(ascii);
-  Serial.println("Node: " + String(nodeID));
+  Serial.print("Node: ");
+  Serial.println("0 | master");
   Serial.println("ESP32-S3");
   Serial.println("----------------------------------------------");
   Serial.println("Frequency: " + String(ESP.getCpuFreqMHz()) + " MHz");
@@ -81,6 +83,14 @@ void printByteBinary(byte value) {
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(40000);
+
+  unsigned long start = millis();
+  while (!Serial && millis() - start < 5000) {
+    delay(10);
+  }
+
+  delay(1800);
+  Serial.println("master booted");
 
   // init CAN bus
   twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_4, GPIO_NUM_5, TWAI_MODE_NORMAL);

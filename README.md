@@ -1,5 +1,3 @@
-
-
 # Node to Node Communications:
 
 When messages are sent from node to node they are done so in this 4 byte format:
@@ -26,6 +24,10 @@ Node2: 0x02
 Node3: 0x03... and so on.
 
 
+# NOTE: FAILURE TO DISCONNECT SERIAL CONNECTIONS BEFORE UNPLUGGING USB-C WILL RESULT IN A HUGE WASTE OF TIME
+
+The Serial port will be stuck open and unable to connect. I have tried pretty much everything and the only solution I have found is to unplug the device and wait ~10 minutes and try again.
+
 # Command codes are also sent as follows :
 (integer form, but sent as bytes)
 
@@ -49,7 +51,6 @@ BLUE  -> pin 16: blink/utility LED
 GREEN -> pin 17: status LED
 
 RED   -> pin 18: error LED
-
 
 # Architecture
 
