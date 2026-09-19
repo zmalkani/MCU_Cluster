@@ -2,39 +2,39 @@
 #include <globals.h>
 #include <cstring>
 
-#include "driver/twai.h"
+#include <Wire.h>
 
 constexpr uint8_t nodeID = 0x06;
+constexpr uint8_t nodeAddress = 0x06;
 
-boolean taskRunning = false;
+bool taskRunning = false;
+
+uint8_t receivedCommand = 0; 
+uint8_t response[8];
+uint8_t responseLength = 0;
+bool commandReady = false;
+
+void receiveCommand(int bytes){
+  if (bytes < 1) return;
+  receivedCommand = Wire.read();
+
+  while(Wire.available()){
+    Wire.read(); // discard any extra bytes
+  }
+
+  commandReady = true;
+}
+
+void sendResponse() {
+  Wire.write(response, responseLength);
+}
 
 void setup() {
 
   Serial.begin(115200);
   Serial.println("Node ID: " + String(nodeID));
-
-  // init CAN bus configuration
-  twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_4, GPIO_NUM_5, TWAI_MODE_NORMAL);
-  twai_timing_config_t t_config = TWAI_TIMING_CONFIG_125KBITS(); // Set bus speed to 125 kbps
-  twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
-  
-  // Install and start TWAI driver
-  if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK) {
-    
-  } else {
-    
-    return;
-  }
-
-  if (twai_start() == ESP_OK) {
-    
-  } else {
-    
-    return;
-  }
-
-
-
+  Wire.begin(13,14); // init i2c bus
+  Wire.onRequest(sendResponse);
 
   pinMode(16, OUTPUT); // blink/utility LED
   pinMode(17, OUTPUT); // status LED
@@ -53,13 +53,12 @@ void setup() {
     digitalWrite(16,HIGH);
     delay(100);
     digitalWrite(16, LOW);
-    
-    
+ 
   }
 }
 
 void loop() {
-  twai_message_t rx_msg;
+ 
 
   //scan for messages with a 50ms timeout
   if (twai_receive(&rx_msg, pdMS_TO_TICKS(50)) == ESP_OK) {

@@ -1,15 +1,15 @@
 # Node to Node Communications:
 
-When messages are sent from node to node they are done so in this 4 byte format:
+When messages are sent from node to node they are done so in this format
 
 
-byte1: recipient ID
+begin trans: recipient/target ID
 
-byte2: command
+write command: e.g. 1 = ping, 2 = blink
 
-byte3: argument
+write arg: 
 
-byte4: flag
+write flag: 
 
 
 # Recipient IDs are as follows:

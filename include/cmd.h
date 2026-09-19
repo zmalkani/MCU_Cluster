@@ -1,7 +1,9 @@
-#pragma once //compile once only
+#pragma once //compile once
 #include <Arduino.h>
 #include <globals.h>
-#include "driver/twai.h"
+
+#include <Wire.h>
+
 
 inline void test() {
     digitalWrite(16, HIGH);
@@ -12,12 +14,13 @@ inline void test() {
     Serial.println("Test Success");
 }
 
+
+
 inline uint8_t ping(int n, int type){
     uint8_t liveNode = 0xFF;
-    uint8_t targID = n;
     if(n == 0){
         Serial.println("Pinging master (self)...");
-        liveNode = 0x01;
+        liveNode = 1;
         return liveNode;
     }/*else if (type == 1){
         // get all node status via CAN bus
@@ -45,35 +48,20 @@ inline uint8_t ping(int n, int type){
             
     }*/else if (type == 0){
         //get node_n status via CAN bus
-        twai_message_t msg;
-        msg.identifier = 0x00;        // Universal Master Command ID
-        msg.extd = 0;
-        msg.data_length_code = 4; // 4 bytes of data
-        msg.data[0] = targID;    // Byte 0 specifies destination (e.g., 3)
-        msg.data[1] = 1;         // Byte 1 specifies command
-        msg.data[2] = 0;  
-        msg.data[3] = 0;  
-
-        esp_err_t txResult = twai_transmit(&msg, pdMS_TO_TICKS(100));
-        if (txResult != ESP_OK) {
-            Serial.println("TX FAILED: " + String(esp_err_to_name(txResult)));
-        }
-
-        twai_status_info_t status;
-        twai_get_status_info(&status);
-        Serial.println("TX errors: " + String(status.tx_error_counter) +
-                        " RX errors: " + String(status.rx_error_counter) +
-                        " Bus state: " + String(status.state));
+        
+        Wire.beginTransmission(n); //begin w/ target node
+        Wire.write(1); //cmd id  1 for ping
+        Wire.write(0); //no arg
+        Wire.write(0); //no flag
+        Wire.endTransmission(); //end trans.
 
         Serial.println("Pinging node " + (String)n + "...");
         //MESSAGE SENT
         //NOW WAIT FOR RESPONSE
-        twai_message_t rx_msg;
-        if (twai_receive(&rx_msg, pdMS_TO_TICKS(50)) == ESP_OK){
-
-            // check if this message was sent to this node via data[0] (the first byte of the message)
-            uint8_t returnedID = rx_msg.data[1];
-            liveNode = returnedID;
+        if(Wire.requestFrom(n, 1) == 1){
+            liveNode = Wire.read();
+        }else{
+            Serial.println("Node "+(String)n+" unresponsive.");
         }
     }
 
@@ -95,18 +83,14 @@ inline void blink(int n, int millis){
         //send blink command to node_n via CAN bus
 
         //convert to seconds to fit in byte format
-        millis = millis/1000;
+        millis /= 1000;
 
-        twai_message_t msg;
-        msg.identifier = 0x00;        // Universal Master Command ID
-        msg.extd = 0;
-        msg.data_length_code = 4; // 4 bytes of data
-        msg.data[0] = (uint8_t)n;    // Byte 0 specifies destination (e.g., 3)
-        msg.data[1] = 2;         // Byte 1 specifies command
-        msg.data[2] = (uint8_t)millis;  
-        msg.data[3] = 0;  
+        Wire.beginTransmission(n); //begin w/ target node
+        Wire.write(2); //cmd id  2 for blink
+        Wire.write((uint8_t)millis); //blink duration
+        Wire.write(0); //no flag for this case
+        Wire.endTransmission(); //end trans.
 
-        twai_transmit(&msg, pdMS_TO_TICKS(100));
 
 
         Serial.println("Blink Sent to Node"+(String)n);

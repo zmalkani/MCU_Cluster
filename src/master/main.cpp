@@ -3,7 +3,7 @@
 #include <globals.h>
 #include <cstring> 
 
-#include "driver/twai.h"
+#include <Wire.h>
 
 char nodeID = 0;
 String ascii = "    ___ ___________  __                    \n"
@@ -92,27 +92,7 @@ void setup() {
   delay(1800);
   Serial.println("master booted");
 
-  // init CAN bus
-  twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_4, GPIO_NUM_5, TWAI_MODE_NORMAL);
-  twai_timing_config_t t_config = TWAI_TIMING_CONFIG_125KBITS(); // Set bus speed to 125 kbps
-  twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
-  
-  // Install and start TWAI driver
-  if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK) {
-    Serial.println("TWAI Driver installed successfully.");
-  } else {
-    Serial.println("Failed to install TWAI driver.");
-    return;
-  }
-
-  if (twai_start() == ESP_OK) {
-    Serial.println("TWAI Driver started successfully.");
-  } else {
-    Serial.println("Failed to start TWAI driver.");
-    return;
-  }
-
-
+  Wire.begin(13,14); // init i2c bus
   
   
   serialSetup();
