@@ -54,7 +54,17 @@ inline uint8_t ping(int n, int type){
         msg.data[2] = 0;  
         msg.data[3] = 0;  
 
-        twai_transmit(&msg, pdMS_TO_TICKS(100));
+        esp_err_t txResult = twai_transmit(&msg, pdMS_TO_TICKS(100));
+        if (txResult != ESP_OK) {
+            Serial.println("TX FAILED: " + String(esp_err_to_name(txResult)));
+        }
+
+        twai_status_info_t status;
+        twai_get_status_info(&status);
+        Serial.println("TX errors: " + String(status.tx_error_counter) +
+                        " RX errors: " + String(status.rx_error_counter) +
+                        " Bus state: " + String(status.state));
+
         Serial.println("Pinging node " + (String)n + "...");
         //MESSAGE SENT
         //NOW WAIT FOR RESPONSE

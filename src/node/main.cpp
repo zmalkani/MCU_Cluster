@@ -4,11 +4,14 @@
 
 #include "driver/twai.h"
 
-char nodeID = 0x01;
+constexpr uint8_t nodeID = 0x06;
 
 boolean taskRunning = false;
 
 void setup() {
+
+  Serial.begin(115200);
+  Serial.println("Node ID: " + String(nodeID));
 
   // init CAN bus configuration
   twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_4, GPIO_NUM_5, TWAI_MODE_NORMAL);
@@ -17,16 +20,16 @@ void setup() {
   
   // Install and start TWAI driver
   if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK) {
-    Serial.println("TWAI Driver installed successfully.");
+    
   } else {
-    Serial.println("Failed to install TWAI driver.");
+    
     return;
   }
 
   if (twai_start() == ESP_OK) {
-    Serial.println("TWAI Driver started successfully.");
+    
   } else {
-    Serial.println("Failed to start TWAI driver.");
+    
     return;
   }
 
@@ -39,19 +42,19 @@ void setup() {
   pinMode(35, OUTPUT);
   //startup status blinks
   for (int i =0; i < 3; i++){
+    digitalWrite(18, HIGH);
+    delay(100);
+    digitalWrite(18, LOW);
+    
+    digitalWrite(17, HIGH);
+    delay(100);
+    digitalWrite(17, LOW);
+
     digitalWrite(16,HIGH);
     delay(100);
-    digitalWrite(17,HIGH);
-    delay(100);
-    digitalWrite(18,HIGH);
-    delay(100);
-    digitalWrite(35,HIGH);
-    delay(100);
-    //turn all off
-    digitalWrite(16,LOW);
-    digitalWrite(17,LOW);
-    digitalWrite(18,LOW);
-    digitalWrite(35,LOW);
+    digitalWrite(16, LOW);
+    
+    
   }
 }
 
@@ -63,6 +66,7 @@ void loop() {
 
     //step1: Check if this message was sent to this node via data[0] (the first byte of the message)
     if (rx_msg.data[0] == nodeID) {
+      Serial.println("Got frame, dest=" + String(rx_msg.data[0]) + " cmd=" + String(rx_msg.data[1]));
       
       //step2: Read the command stored in data[1]
       uint8_t cmd = rx_msg.data[1];
@@ -104,12 +108,12 @@ void loop() {
           break;
         /*
         case 3:
-          Serial.println("Command Received: Turning LED OFF");
+          ------("Command Received: Turning LED OFF");
           digitalWrite(LED_BUILTIN, LOW);
           break;
 
         case 4:
-          Serial.println("Command Received: Rebooting...");
+          ------("Command Received: Rebooting...");
           ESP.restart();
           break;
         */
