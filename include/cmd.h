@@ -53,7 +53,12 @@ inline uint8_t ping(int n, int type){
         Wire.write(1); //cmd id  1 for ping
         Wire.write(0); //no arg
         Wire.write(0); //no flag
-        Wire.endTransmission(); //end trans.
+        uint8_t err = Wire.endTransmission(); //end trans.
+        if(err != 0){ //0 = success, 2 = NACK on address (node not on bus)
+            Serial.println("Pinging node " + (String)n + "...");
+            Serial.println("Err: node " + (String)n + " did not ACK write (endTransmission err " + (String)err + "). Check wiring/power/firmware.");
+            return liveNode; //0xFF
+        }
 
         Serial.println("Pinging node " + (String)n + "...");
         //MESSAGE SENT
@@ -89,11 +94,34 @@ inline void blink(int n, int millis){
         Wire.write(2); //cmd id  2 for blink
         Wire.write((uint8_t)millis); //blink duration
         Wire.write(0); //no flag for this case
-        Wire.endTransmission(); //end trans.
-
-
+        uint8_t err = Wire.endTransmission(); //end trans.
+        if(err != 0){ //0 = success, 2 = NACK on address (node not on bus)
+            Serial.println("Err: node " + (String)n + " did not ACK write (endTransmission err " + (String)err + "). Blink not sent.");
+            return;
+        }
 
         Serial.println("Blink Sent to Node"+(String)n);
+    }
+}
+
+inline void scan(){
+    Serial.println("Waiting 2s for nodes to boot...");
+    delay(2000);
+    Serial.println("Scanning i2c bus (addresses 1-127)...");
+
+    uint8_t found = 0;
+    for(uint8_t addr = 1; addr < 127; addr++){
+        Wire.beginTransmission(addr);
+        if(Wire.endTransmission() == 0){ //0 = device ACKed at this address
+            Serial.println("  found device at address " + (String)addr + " (0x" + String(addr, HEX) + ")");
+            found++;
+        }
+    }
+
+    if(found == 0){
+        Serial.println("No devices found. Check SDA/SCL wiring and shared GND.");
+    }else{
+        Serial.println("Scan complete. " + (String)found + " device(s) found.");
     }
 }
 

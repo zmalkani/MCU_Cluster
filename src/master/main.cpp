@@ -93,8 +93,10 @@ void setup() {
   Serial.println("master booted");
 
   Wire.begin(13,14); // init i2c bus
-  
-  
+  Wire.setClock(50000); //uncomment to slow the bus if u get issues
+  pinMode(16, OUTPUT); // blink/utility LED
+  pinMode(35, OUTPUT); // activity LED
+
   serialSetup();
 }
 
@@ -210,12 +212,12 @@ void loop() {
         }
 
       }else if(arg.equals("all")){
-        for (int i = 1; i <= 7; i++){
+        for (int i = 1; i <= 6; i++){ //nodes 1-6
           int statusArray [8]; // 8 index array
           statusByte = status(i);
 
-          for(int i = 0; i < 8; i++){ //convert statusByte into array
-          statusArray[i] = (statusByte >> (7 - i) & 0x01); //
+          for(int b = 0; b < 8; b++){ //convert statusByte into array
+          statusArray[b] = (statusByte >> (7 - b) & 0x01); //
           }
 
           if(statusArray[0] == 1){
@@ -238,6 +240,17 @@ void loop() {
           }
         }
       }  
+    }else if(cmd.equals("scan")){ //scan i2c bus
+      prompted = false;
+      if(arg.equals("help")){
+        terminalPrintln("Functionality: scan i2c bus for live devices (addresses 1-127)");
+        terminalPrintln("Input Format: scan <-> <->");
+        terminalPrintln("Ex1: scan - -");
+        terminalPrintln("Output: Lists every address that ACKs, with a 2s boot delay first");
+      }else{
+        scan();
+      }
+
     }else{
       prompted = false;
       terminalPrintln("Err: command '"+cmd+"' unknown");
